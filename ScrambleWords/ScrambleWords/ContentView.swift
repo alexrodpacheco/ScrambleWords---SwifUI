@@ -17,6 +17,10 @@ struct ContentView: View {
                         .font(.system(size: 15))
                         .foregroundColor(Color.white)
                         .padding(.top)
+                    HStack {
+                        LetterView(letter: "A")
+                            .padding(.top)
+                    }
                 }
             }
         }
@@ -26,5 +30,17 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct LetterView: View {
+    let letter: String
+    var body: some View {
+        Text(letter)
+            .font(.system(size: 15, weight: .semibold))
+            .frame(width: 30, height: 30)
+            .foregroundColor(Color.white)
+            .background(Color.white.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }
