@@ -24,9 +24,13 @@ struct ContentView: View {
                             .frame(width: 100, height: 100)
                         Spacer()
                         HStack {
-                            ForEach(guessedLetters) { guessedLetter in
+                            ForEach(Array(guessedLetters.enumerated()), id: \.1) { index, guessedLetter in
                                 VStack {
                                     LetterView(letter: guessedLetter)
+                                        .onTapGesture {
+                                            guessedLetters.remove(at: index)
+                                            letters[guessedLetter.id].text = guessedLetter.text
+                                        }
                                     Rectangle()
                                         .fill(Color.white)
                                         .frame(width: 25, height: 2)
