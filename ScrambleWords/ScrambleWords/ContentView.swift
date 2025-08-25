@@ -2,8 +2,15 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State var letters: [String] = ["O", "R", "A", "N", "G", "E", ]
-    @State var guessedLetters: [String] = []
+    @State var letters: [Letter] = [
+        Letter(id: 0, text: "O"),
+        Letter(id: 1, text: "N"),
+        Letter(id: 2, text: "E"),
+        Letter(id: 3, text: "R"),
+        Letter(id: 4, text: "G"),
+        Letter(id: 5, text: "A")
+    ]
+    @State var guessedLetters: [Letter] = []
     
     var body: some View {
         GeometryReader { proxy in
@@ -17,7 +24,7 @@ struct ContentView: View {
                             .frame(width: 100, height: 100)
                         Spacer()
                         HStack {
-                            ForEach(guessedLetters, id: \.self) { guessedLetter in
+                            ForEach(guessedLetters) { guessedLetter in
                                 VStack {
                                     LetterView(letter: guessedLetter)
                                     Rectangle()
@@ -35,10 +42,13 @@ struct ContentView: View {
                         .foregroundColor(Color.white)
                         .padding(.top)
                     HStack {
-                        ForEach(letters, id: \.self) { letter in
+                        ForEach(Array(letters.enumerated()), id: \.1) { index, letter in
                             LetterView(letter: letter)
                                 .onTapGesture {
-                                    guessedLetters.append(letter)
+                                    if !letter.text.isEmpty {
+                                        guessedLetters.append(letter)
+                                        letters[index].text = ""
+                                    }
                                 }
                         }
                     }
@@ -56,9 +66,9 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 struct LetterView: View {
-    let letter: String
+    let letter: Letter
     var body: some View {
-        Text(letter)
+        Text(letter.text)
             .font(.system(size: 15, weight: .semibold))
             .frame(width: 30, height: 30)
             .foregroundColor(Color.white)
