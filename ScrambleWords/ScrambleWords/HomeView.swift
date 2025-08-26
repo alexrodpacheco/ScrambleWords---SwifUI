@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct HomeView: View {
     @State var guessedLetters: [LetterModel] = []
     @State var showSucess = false
     @State var showFailure = false
@@ -144,19 +144,7 @@ struct ContentView: View {
     
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
-            ContentView()
-        }
-    }
-    
-    struct LetterView: View {
-        let letter: LetterModel
-        var body: some View {
-            Text(letter.text)
-                .font(.system(size: 15, weight: .semibold))
-                .frame(width: 30, height: 30)
-                .foregroundColor(Color.white)
-                .background(Color.white.opacity(0.4))
-                .clipShape(RoundedRectangle(cornerRadius: 4))
+            HomeView()
         }
     }
 }
