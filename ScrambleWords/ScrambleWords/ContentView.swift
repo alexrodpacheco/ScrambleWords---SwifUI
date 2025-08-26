@@ -56,8 +56,10 @@ struct ContentView: View {
                                 VStack {
                                     LetterView(letter: guessedLetter)
                                         .onTapGesture {
-                                            guessedLetters.remove(at: index)
-                                            questions[currentQuestionIndex].randomLetters[guessedLetter.id].text = guessedLetter.text
+                                            if let index = guessedLetters.firstIndex(of: guessedLetter) {
+                                                guessedLetters.remove(at: index)
+                                                questions[currentQuestionIndex].randomLetters[guessedLetter.id].text = guessedLetter.text
+                                            }
                                         }
                                     Rectangle()
                                         .fill(Color.white)
@@ -91,6 +93,11 @@ struct ContentView: View {
                                                 score += 1
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                                     showSucess = false
+                                                    if currentQuestionIndex == questions.count - 1 {
+                                                        
+                                                    } else {
+                                                        currentQuestionIndex += 1
+                                                    }
                                                 })
                                             } else {
                                                 showFailure = true
@@ -101,8 +108,14 @@ struct ContentView: View {
                                                 }
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                                     showFailure = false
+                                                    if currentQuestionIndex == questions.count - 1 {
+                                                        
+                                                    } else {
+                                                        currentQuestionIndex += 1
+                                                    }
                                                 })
                                             }
+                                            guessedLetters.removeAll()
                                         }
                                     }
                                 }
