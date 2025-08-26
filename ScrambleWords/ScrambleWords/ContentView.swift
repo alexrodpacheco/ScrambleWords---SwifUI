@@ -1,17 +1,44 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var guessedLetters: [LetterModel] = []
+    @State var showSucess = false
+    @State var showFailure = false
+    @State var score = 0
+    @State var currentQuestionIndex = 0
     
-    @State var letters: [Letter] = [
-        Letter(id: 0, text: "O"),
-        Letter(id: 1, text: "N"),
-        Letter(id: 2, text: "E"),
-        Letter(id: 3, text: "R"),
-        Letter(id: 4, text: "G"),
-        Letter(id: 5, text: "A")
+    @State var questions: [QuestionModel] = [
+        QuestionModel(image: "orange",
+                      answer: "ORANGE",
+                      randomLetters: [
+                        LetterModel(id: 0, text: "O"),
+                        LetterModel(id: 1, text: "N"),
+                        LetterModel(id: 2, text: "E"),
+                        LetterModel(id: 3, text: "R"),
+                        LetterModel(id: 4, text: "G"),
+                        LetterModel(id: 5, text: "A")
+        ]),
+        QuestionModel(image: "banana",
+                      answer: "BANANA",
+                      randomLetters: [
+                        LetterModel(id: 0, text: "B"),
+                        LetterModel(id: 1, text: "A"),
+                        LetterModel(id: 2, text: "N"),
+                        LetterModel(id: 3, text: "A"),
+                        LetterModel(id: 4, text: "N"),
+                        LetterModel(id: 5, text: "A")
+        ]),
+        QuestionModel(image: "apple",
+                      answer: "APPLE",
+                      randomLetters: [
+                        LetterModel(id: 0, text: "A"),
+                        LetterModel(id: 1, text: "P"),
+                        LetterModel(id: 2, text: "P"),
+                        LetterModel(id: 3, text: "L"),
+                        LetterModel(id: 4, text: "E")
+        ])
+        
     ]
-    @State var guessedLetters: [Letter] = []
-    let correctAnwser = "ORANGE"
     
     var body: some View {
         GeometryReader { proxy in
@@ -20,7 +47,7 @@ struct ContentView: View {
                 VStack {
                     VStack {
                         Spacer()
-                        Image("orange")
+                        Image(questions[currentQuestionIndex].image)
                             .resizable()
                             .frame(width: 100, height: 100)
                         Spacer()
@@ -30,7 +57,7 @@ struct ContentView: View {
                                     LetterView(letter: guessedLetter)
                                         .onTapGesture {
                                             guessedLetters.remove(at: index)
-                                            letters[guessedLetter.id].text = guessedLetter.text
+                                            questions[currentQuestionIndex].randomLetters[guessedLetter.id].text = guessedLetter.text
                                         }
                                     Rectangle()
                                         .fill(Color.white)
@@ -39,56 +66,84 @@ struct ContentView: View {
                             }
                         }
                         .padding(.bottom, 20)
+                        .opacity(0.3)
                     }
                     .frame(width: proxy.size.width * 0.9, height: proxy.size.width * 0.9)
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 2))
-                    Text("Score 0")
+                    Text("Score \(score)")
                         .font(.system(size: 15))
                         .foregroundColor(Color.white)
                         .padding(.top)
                     HStack {
-                        ForEach(Array(letters.enumerated()), id: \.1) { index, letter in
+                        ForEach(Array(questions[currentQuestionIndex].randomLetters.enumerated()), id: \.1) { index, letter in
                             LetterView(letter: letter)
                                 .onTapGesture {
                                     if !letter.text.isEmpty {
                                         guessedLetters.append(letter)
-                                        letters[index].text = ""
-                                        if guessedLetters.count == letters.count {
+                                        questions[currentQuestionIndex].randomLetters[index].text = ""
+                                        if guessedLetters.count == questions[currentQuestionIndex].randomLetters.count {
                                             var guessedAnswer = ""
                                             for guessedLetter in guessedLetters {
                                                 guessedAnswer += guessedLetter.text
                                             }
-                                            if guessedAnswer == correctAnwser {
-                                                print("correct")
+                                            if guessedAnswer == questions[currentQuestionIndex].answer {
+                                                showSucess = true
+                                                score += 1
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                                                    showSucess = false
+                                                })
                                             } else {
-                                                print("wrong")
+                                                showFailure = true
+                                                if score <= 0 {
+                                                    score = 0
+                                                } else {
+                                                    score -= 1
+                                                }
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                                                    showFailure = false
+                                                })
                                             }
                                         }
                                     }
                                 }
                         }
+                        .padding(.top)
                     }
-                    .padding(.top)
+                }
+                if showSucess {
+                    VStack {
+                        Image("tick")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))
+                }
+                if showFailure {
+                    VStack {
+                        Image("cross")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))
                 }
             }
         }
     }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+    
+    
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {
+            ContentView()
+        }
     }
-}
-
-struct LetterView: View {
-    let letter: Letter
-    var body: some View {
-        Text(letter.text)
-            .font(.system(size: 15, weight: .semibold))
-            .frame(width: 30, height: 30)
-            .foregroundColor(Color.white)
-            .background(Color.white.opacity(0.4))
-            .clipShape(RoundedRectangle(cornerRadius: 4))
+    
+    struct LetterView: View {
+        let letter: LetterModel
+        var body: some View {
+            Text(letter.text)
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 30, height: 30)
+                .foregroundColor(Color.white)
+                .background(Color.white.opacity(0.4))
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+        }
     }
 }
