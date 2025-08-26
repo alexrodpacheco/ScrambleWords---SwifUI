@@ -1,20 +1,25 @@
-//
-//  ScoreView.swift
-//  ScrambleWords
-//
-//  Created by Alex Rodrigues Pacheco on 26/08/25.
-//
-
 import SwiftUI
 
 struct ScoreView: View {
+    let score: Int
+    let questionsCount: Int
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack {
+                Text("Final Score")
+                    .foregroundColor(.white)
+                    .font(.system(size: 26, weight: .bold))
+                Text("Score \(score)/\(questionsCount)")
+                    .foregroundColor(.white)
+            }
+        }
     }
 }
 
 struct ScoreView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreView()
+        ScoreView(score: 3, questionsCount: 3)
     }
 }
