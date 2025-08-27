@@ -4,41 +4,10 @@ struct HomeView: View {
     @State var guessedLetters: [LetterModel] = []
     @State var showSucess = false
     @State var showFailure = false
+    @State var showFinalScore = false
     @State var score = 0
     @State var currentQuestionIndex = 0
-    
-    @State var questions: [QuestionModel] = [
-        QuestionModel(image: "orange",
-                      answer: "ORANGE",
-                      randomLetters: [
-                        LetterModel(id: 0, text: "O"),
-                        LetterModel(id: 1, text: "N"),
-                        LetterModel(id: 2, text: "E"),
-                        LetterModel(id: 3, text: "R"),
-                        LetterModel(id: 4, text: "G"),
-                        LetterModel(id: 5, text: "A")
-        ]),
-        QuestionModel(image: "banana",
-                      answer: "BANANA",
-                      randomLetters: [
-                        LetterModel(id: 0, text: "B"),
-                        LetterModel(id: 1, text: "A"),
-                        LetterModel(id: 2, text: "N"),
-                        LetterModel(id: 3, text: "A"),
-                        LetterModel(id: 4, text: "N"),
-                        LetterModel(id: 5, text: "A")
-        ]),
-        QuestionModel(image: "apple",
-                      answer: "APPLE",
-                      randomLetters: [
-                        LetterModel(id: 0, text: "A"),
-                        LetterModel(id: 1, text: "P"),
-                        LetterModel(id: 2, text: "P"),
-                        LetterModel(id: 3, text: "L"),
-                        LetterModel(id: 4, text: "E")
-        ])
-        
-    ]
+    @State var questions = QuestionModel.generateQuestion()
     
     var body: some View {
         GeometryReader { proxy in
@@ -94,6 +63,7 @@ struct HomeView: View {
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                                     showSucess = false
                                                     if currentQuestionIndex == questions.count - 1 {
+                                                        showFinalScore = true
                                                         
                                                     } else {
                                                         currentQuestionIndex += 1
@@ -109,6 +79,7 @@ struct HomeView: View {
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                                                     showFailure = false
                                                     if currentQuestionIndex == questions.count - 1 {
+                                                        showFinalScore = true
                                                         
                                                     } else {
                                                         currentQuestionIndex += 1
@@ -139,6 +110,13 @@ struct HomeView: View {
                 }
             }
         }
+        .sheet(isPresented: $showFinalScore, onDismiss: {
+            questions = QuestionModel.generateQuestion()
+            currentQuestionIndex = 0
+            score = 0
+        }, content: {
+            ScoreView(score: score, questionsCount: questions.count)
+        })
     }
     
     
