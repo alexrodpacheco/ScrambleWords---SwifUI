@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    // MARK: - Properties
     @State var guessedLetters: [LetterModel] = []
     @State var showSucess = false
     @State var showFailure = false
@@ -9,6 +10,7 @@ struct HomeView: View {
     @State var currentQuestionIndex = 0
     @State var questions = QuestionModel.generateQuestion()
     
+    // MARK: - View Builders
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -25,10 +27,7 @@ struct HomeView: View {
                                 VStack {
                                     LetterView(letter: guessedLetter)
                                         .onTapGesture {
-                                            if let index = guessedLetters.firstIndex(of: guessedLetter) {
-                                                guessedLetters.remove(at: index)
-                                                questions[currentQuestionIndex].randomLetters[guessedLetter.id].text = guessedLetter.text
-                                            }
+                                            removeGuessedLetter(guessedLetter)
                                         }
                                     Rectangle()
                                         .fill(Color.white)
@@ -49,46 +48,7 @@ struct HomeView: View {
                         ForEach(Array(questions[currentQuestionIndex].randomLetters.enumerated()), id: \.1) { index, letter in
                             LetterView(letter: letter)
                                 .onTapGesture {
-                                    if !letter.text.isEmpty {
-                                        guessedLetters.append(letter)
-                                        questions[currentQuestionIndex].randomLetters[index].text = ""
-                                        if guessedLetters.count == questions[currentQuestionIndex].randomLetters.count {
-                                            var guessedAnswer = ""
-                                            for guessedLetter in guessedLetters {
-                                                guessedAnswer += guessedLetter.text
-                                            }
-                                            if guessedAnswer == questions[currentQuestionIndex].answer {
-                                                showSucess = true
-                                                score += 1
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                                                    showSucess = false
-                                                    if currentQuestionIndex == questions.count - 1 {
-                                                        showFinalScore = true
-                                                        
-                                                    } else {
-                                                        currentQuestionIndex += 1
-                                                    }
-                                                })
-                                            } else {
-                                                showFailure = true
-                                                if score <= 0 {
-                                                    score = 0
-                                                } else {
-                                                    score -= 1
-                                                }
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                                                    showFailure = false
-                                                    if currentQuestionIndex == questions.count - 1 {
-                                                        showFinalScore = true
-                                                        
-                                                    } else {
-                                                        currentQuestionIndex += 1
-                                                    }
-                                                })
-                                            }
-                                            guessedLetters.removeAll()
-                                        }
-                                    }
+                                    handleLetterSelection(letter: letter, index: index)
                                 }
                         }
                         .padding(.top)
@@ -124,5 +84,60 @@ struct HomeView: View {
         static var previews: some View {
             HomeView()
         }
+    }
+}
+
+private extension HomeView {
+    // MARK: - Logic Functions
+    
+    func handleLetterSelection(letter: LetterModel, index: Int) {
+        if !letter.text.isEmpty {
+            guessedLetters.append(letter)
+            questions[currentQuestionIndex].randomLetters[index].text = ""
+            checkAnswer()
+        }
+    }
+    
+    func removeGuessedLetter(_ guessedLetter: LetterModel) {
+        if let index = guessedLetters.firstIndex(of: guessedLetter) {
+            guessedLetters.remove(at: index)
+            questions[currentQuestionIndex].randomLetters[guessedLetter.id].text = guessedLetter.text
+        }
+    }
+    
+    func checkAnswer() {
+        if guessedLetters.count == questions[currentQuestionIndex].randomLetters.count {
+            var guessedAnswer = ""
+            for guessedLetter in guessedLetters {
+                guessedAnswer += guessedLetter.text
+            }
+            if guessedAnswer == questions[currentQuestionIndex].answer {
+                showSucess = true
+                score += 1
+                proceedToNextQUestion(withDelay: true)
+            } else {
+                showFailure = true
+                if score <= 0 {
+                    score = 0
+                } else {
+                    score -= 1
+                }
+                proceedToNextQUestion(withDelay: true)
+            }
+            guessedLetters.removeAll()
+        }
+    }
+    
+    func proceedToNextQUestion(withDelay: Bool) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            showSucess = false
+            showFailure = false
+            if currentQuestionIndex == questions.count - 1 {
+                showFinalScore = true
+                
+            } else {
+                currentQuestionIndex += 1
+            }
+        })
     }
 }
